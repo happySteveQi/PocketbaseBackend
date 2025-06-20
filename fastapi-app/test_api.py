@@ -1,19 +1,20 @@
 import httpx
 import asyncio
 
-BASE_URL = "http://127.0.0.1:6000"
-# BASE_URL = "http://8.140.195.241/api"
+# BASE_URL = "http://127.0.0.1:6000"
+BASE_URL = "http://8.140.195.241"
 
-async def test_register_login():
+async def test_register():
     print("📨 测试注册用户")
     import time
-    # email = f"testuser_{int(time.time())}@example.com"
-    email = f"444835397@qq.com"
+    email = f"testuser_{int(time.time())}@example.com"
+    # email = f"444835397@qq.com"
     user_data = {
         "email": email,
         "password": "12345678",
         "passwordConfirm": "12345678",
-        "name": "TestUser"
+        "name": "TestUser",
+        "verified": "true"
     }
 
     async with httpx.AsyncClient() as client:
@@ -30,7 +31,20 @@ async def test_register_login():
         # r = await client.post(f"{BASE_URL}/api/user/request-verification", json={"email": user_data["email"]})
         # print("验证邮件响应:", r.status_code, r.json() if r.content else "No content")
 
+        return user_data
+
+async def test_login(user_data=None, use_default=False):
+    if use_default:
+        print("🔐 使用默认账号登录")
+        default_user_data = {
+            "email": "testuser_1750315316@example.com",
+            "password": "12345678"
+        }
+        user_data = default_user_data
+    else:
         print("🔐 登录用户")
+    
+    async with httpx.AsyncClient() as client:
         r = await client.post(f"{BASE_URL}/api/user/login", json={
             "identity": user_data["email"],
             "password": user_data["password"]
@@ -42,6 +56,11 @@ async def test_register_login():
         user_id = login_result.get("record", {}).get("id")
 
         return token, user_id
+
+async def test_register_login():
+    user_data = await test_register()
+    token, user_id = await test_login(user_data)
+    return token, user_id
 
 async def test_note_crud(token):
     headers = {"Authorization": f"Bearer {token}"}
@@ -89,7 +108,10 @@ async def test_note_crud(token):
         # print("删除响应:", r.status_code)
 
 async def main():
-    token, user_id = await test_register_login()
+    # token, user_id = await test_register_login()
+    # print(f"test_register_login() token: {token} user_id: {user_id}")
+    token, user_id = await test_login(use_default=True)
+    print(f"test_login() token: {token} user_id: {user_id}")
     # await test_note_crud(token)
 
 if __name__ == "__main__":

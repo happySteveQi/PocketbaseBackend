@@ -3,7 +3,7 @@ version: '3.8'
 services:
   pocketbase:
     build:
-      context: ./pocketbase_0.28.3_linux_arm64      # 假设 Dockerfile 在这个目录下
+      context: ./pocketbase_0.28.3_linux_arm64      # 使用 arm64 版本
     container_name: pocketbase
     ports:
       - "8090:8090"
